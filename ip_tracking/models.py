@@ -1,8 +1,6 @@
 from django.db import models
 from django.db import models
 from django.utils import timezone
-
-
 class BlockedIP(models.Model):
     """IP addresses that should be blocked immediately."""
     ip_address = models.GenericIPAddressField(unique=True)
