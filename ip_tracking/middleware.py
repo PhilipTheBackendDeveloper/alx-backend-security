@@ -2,6 +2,7 @@ import datetime
 from django.utils.timezone import now # pyright: ignore[reportMissingModuleSource]
 from ip_tracking.models import RequestLog
 from django.utils.deprecation import MiddlewareMixin # pyright: ignore[reportMissingModuleSource]
+from .models import BlockedIP
 
 class IPTrackingMiddleware(MiddlewareMixin):
     def process_request(self, request):
@@ -16,3 +17,15 @@ class IPTrackingMiddleware(MiddlewareMixin):
             path=request.path,
             timestamp=now()
         )
+
+class IPBlockMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        ip = request.META.get('REMOTE_ADDR')
+
+        if BlockedIP.objects.filter(ip_address=ip).exists():
+            return HttpResponseForbidden("Your IP is blocked.")
+
+        return self.get_response(request)
